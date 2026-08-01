@@ -7,30 +7,36 @@ services:
       - "443:443"
     depends_on:
       - wordpress
+    volumes:
+      - /home/rammisse/data/wordpress:/var/www/html
     networks:
       docker_network:
+    restart: always
   mariadb:
     build:
       context: ./requirements/mariadb
       dockerfile: Dockerfile
     volumes:
       - /home/rammisse/data/mariadb:/var/lib/mysql
+    env_file:
+      - .env
     networks:
       docker_network:
+    restart: always
   wordpress:
     build:
       context: ./requirements/wordpress
       dockerfile: Dockerfile
     volumes:
       - /home/rammisse/data/wordpress:/var/www/html
+    env_file:
+      - .env
     depends_on:
       - mariadb
     networks:
       docker_network:
-  
+    restart: always
 networks:
   docker_network:
-    ipam:
-      driver: default
-      config:
-        - subnet: "10.56.1.0/24"
+    driver: bridge
+    name: inception-network
