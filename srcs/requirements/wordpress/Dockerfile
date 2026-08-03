@@ -1,29 +1,24 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
-# Install PHP-FPM, MySQL extension, and dependencies for WP-CLI
-RUN apt-get update -y && \
-    apt-get install -y \
-    php7.4-fpm \
-    php7.4-mysql \
-    mariadb-client \
-    curl \
-    wget && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        php8.2-fpm \
+        php8.2-mysql \
+        wget \
+        ca-certificates \
+        mariadb-client &&  \
     rm -rf /var/lib/apt/lists/*
 
-# Download and install WP-CLI executable
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp
 
-# Create web directory and PHP run directory
-RUN mkdir -p /var/www/html /run/php
+COPY conf/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 
-# Configure PHP-FPM to listen on 0.0.0.0:9000 instead of unix socket
-RUN sed -i 's|listen = /run/php/php7.4-fpm.sock|listen = 0.0.0.0:9000|' /etc/php/7.4/fpm/pool.d/www.conf
-
-# Copy entrypoint script
 COPY tools/wordpress.sh /usr/local/bin/wordpress.sh
 RUN chmod +x /usr/local/bin/wordpress.sh
+
+RUN mkdir -p /run/php
 
 WORKDIR /var/www/html
 

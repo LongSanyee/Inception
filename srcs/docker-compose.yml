@@ -1,17 +1,4 @@
 services:
-  nginx:
-    build:
-      context: ./requirements/nginx
-      dockerfile: Dockerfile
-    ports:
-      - "443:443"
-    depends_on:
-      - wordpress
-    volumes:
-      - /home/rammisse/data/wordpress:/var/www/html
-    networks:
-      docker_network:
-    restart: always
   mariadb:
     build:
       context: ./requirements/mariadb
@@ -21,8 +8,9 @@ services:
     env_file:
       - .env
     networks:
-      docker_network:
+      - docker_network
     restart: always
+
   wordpress:
     build:
       context: ./requirements/wordpress
@@ -34,8 +22,25 @@ services:
     depends_on:
       - mariadb
     networks:
-      docker_network:
+      - docker_network
     restart: always
+  
+  nginx:
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "443:443"
+    depends_on:
+      - wordpress
+    volumes:
+      - /home/rammisse/data/wordpress:/var/www/html
+    networks:
+      - docker_network
+    restart: always
+
+
+
 networks:
   docker_network:
     driver: bridge

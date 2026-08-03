@@ -1,26 +1,18 @@
 #!/bin/bash
 
-if [ ! -d "/var/lib/mysql/$MYSQL_DB" ]; then
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql
     
-    echo "First boot detected. Initializing database..."
-
-    mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
-    mysqld_safe --datadir=/var/lib/mysql &
-
+    mysqld_safe &
     sleep 5
 
-    mysql -u root -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DB}\`;"
-    mysql -u root -e "CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
-    mysql -u root -e "GRANT ALL PRIVILEGES ON \`${MYSQL_DB}\`.* TO '${MYSQL_USER}'@'%';"
-    mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
-    mysql -u root -p"${MYSQL_ROOT_PASSWORD}" -e "FLUSH PRIVILEGES;"
+    mysql -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DB}\`;"
+    mysql -e "CREATE USER IF NOT EXISTS \`${MYSQL_USER}\`@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
+    mysql -e "GRANT ALL PRIVILEGES ON \`${MYSQL_DB}\`.* TO \`${MYSQL_USER}\`@'%';"
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
+    mysql -e "FLUSH PRIVILEGES;"
 
-    mysqladmin -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
-    
-    echo "Database setup complete."
-else
-    echo "Database already exists. Skipping initialization."
+    mysqladmin -u root -p${MYSQL_ROOT_PASSWORD} shutdown
 fi
 
-echo "Starting MariaDB in the foreground..."
-exec mysqld_safe --datadir=/var/lib/mysql
+exec mysqld_safe
