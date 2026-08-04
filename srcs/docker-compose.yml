@@ -10,7 +10,11 @@ services:
     networks:
       - docker_network
     restart: always
-
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   wordpress:
     build:
       context: ./requirements/wordpress
@@ -20,11 +24,16 @@ services:
     env_file:
       - .env
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     networks:
       - docker_network
     restart: always
-  
+    healthcheck:
+      test: ["CMD", "test", "-f", "/var/www/html/wp-config.php"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   nginx:
     build:
       context: ./requirements/nginx
@@ -32,15 +41,13 @@ services:
     ports:
       - "443:443"
     depends_on:
-      - wordpress
+      wordpress:
+        condition: service_healthy
     volumes:
       - /home/rammisse/data/wordpress:/var/www/html
     networks:
       - docker_network
     restart: always
-
-
-
 networks:
   docker_network:
     driver: bridge
