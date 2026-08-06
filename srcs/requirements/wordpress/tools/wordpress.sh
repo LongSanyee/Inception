@@ -1,13 +1,8 @@
 #!/bin/bash
 
-while ! mysql -h mariadb -u ${MYSQL_USER} -p${MYSQL_PASSWORD} -e "SELECT 1;" >/dev/null 2>&1; do
-    sleep 2
-done
-
 cd /var/www/html
 
 if [ ! -f "wp-config.php" ]; then
-    wp core download --allow-root
     
     wp config create \
         --dbname=${MYSQL_DB} \
@@ -31,7 +26,6 @@ if [ ! -f "wp-config.php" ]; then
         --role=author \
         --allow-root
 
-    chown -R www-data:www-data /var/www/html
 fi
 
 exec /usr/sbin/php-fpm8.2 -F
