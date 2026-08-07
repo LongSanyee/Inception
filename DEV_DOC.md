@@ -5,7 +5,7 @@ This document provides a comprehensive guide for developers to set up, build, la
 ## 1.How to set up the enviroment
 Create a .env file inside the srcs directory and populate them with the following variables:
 {
-    DOMAIN_NAME=login,42.fr
+    DOMAIN_NAME=login.42.fr
 
     MYSQL_DB=wordpress
     MYSQL_USER=exampleuser
@@ -29,6 +29,9 @@ Open /etc/hosts as root and add the following line:
 Where the project data is stored in our host machine:
 /home/login/mariadb
 /home/login/wordpress
+
+How it persists:
+Data persistence is achieved using Docker Volumes (configured as bind mounts in the docker-compose.yml). By binding the host machine directories directly to the container directories (/var/lib/mysql and /var/www/html), the data remains safely on the host machine's hard drive even if the Docker containers are stopped, destroyed, or rebuilt.
 
 ## 4.Build and launch
 The project is built using a Makefile utilizing Docker-Compose
